@@ -5,6 +5,7 @@ class Pengeluaran {
   int jumlah;
   String tujuan;
   String catatan;
+  String metodePembayaran; // New field
 
   Pengeluaran({
     required this.idPengeluaran,
@@ -13,16 +14,18 @@ class Pengeluaran {
     required this.jumlah,
     required this.tujuan,
     required this.catatan,
+    required this.metodePembayaran, // Added parameter
   });
 
   factory Pengeluaran.fromJson(Map<String, dynamic> json) {
     return Pengeluaran(
       idPengeluaran: int.tryParse(json['id_pengeluaran'].toString()) ?? 0,
       idAdmin: int.tryParse(json['id_admin'].toString()) ?? 0,
-      tanggal: json['tanggal'].toString(),
-      jumlah: int.tryParse(json['jumlah'].toString()) ?? 0,
-      tujuan: json['tujuan'].toString(),
-      catatan: json['catatan'].toString(),
+      tanggal: json['tanggal']?.toString() ?? '',
+      jumlah: (double.tryParse(json['jumlah'].toString()) ?? 0).toInt(),
+      tujuan: json['tujuan']?.toString() ?? '',
+      catatan: json['catatan']?.toString() ?? '',
+      metodePembayaran: json['metode_pembayaran']?.toString() ?? 'Cash', // New field
     );
   }
 
@@ -34,6 +37,7 @@ class Pengeluaran {
       'jumlah': jumlah,
       'tujuan': tujuan,
       'catatan': catatan,
+      'metode_pembayaran': metodePembayaran, // New field
     };
   }
 }

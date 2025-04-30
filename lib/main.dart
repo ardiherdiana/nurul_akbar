@@ -1,19 +1,24 @@
 import 'package:nurul_akbar/screens/beranda.dart';
 import 'package:flutter/material.dart';
 import 'package:nurul_akbar/screens/login.dart';
-
+import 'package:get/get.dart';
+import 'controllers/admin_controller.dart';
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.put(AdminController());  // Initialize the controller
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(  // Change MaterialApp to GetMaterialApp
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      title: 'Nurul Akbar',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      home: Login(), // Set your home screen
     );
   }
 }

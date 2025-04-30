@@ -1,97 +1,113 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/acara_model.dart';
+import 'dart:convert';
 
 class AcaraController {
-  final String apiUrl =
-      "http://192.168.132.105/api_nurul_akbar/acara.php"; // Sesuaikan dengan API
+  final String baseUrl = 'http://192.168.35.105/api_nurul_akbar';
 
-  // READ: Ambil semua data acara
-  Future<List<Acara>> fetchAcara() async {
+  Future<List<Map<String, dynamic>>> getAcara() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl));
-      print("Response Fetch: \${response.body}"); // Debugging
+      final response = await http.get(Uri.parse('$baseUrl/acara.php'));
 
       if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        return data.map((item) => Acara.fromJson(item)).toList();
+        final List<dynamic> jsonData = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(jsonData);
       } else {
-        throw Exception(
-            "Gagal mengambil data acara. Status: \${response.statusCode}");
+        throw Exception('Failed to load acara: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception("Error fetchAcara: $e");
+      throw Exception('Failed to connect to server: $e');
     }
   }
 
-  // CREATE: Tambah acara baru
-  Future<bool> addAcara(int idAdmin, String namaAcara, String tanggal,
-      String panitia, String catatan) async {
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          "id_admin": idAdmin,
-          "nama_acara": namaAcara,
-          "tanggal": tanggal,
-          "panitia": panitia,
-          "catatan": catatan
-        }),
-      );
-      print("Response Add: \${response.body}"); // Debugging
+  Future<bool> addAcara(
+  int adminId,
+  String namaAcara,
+  String tanggal,
+  String waktu,
+  String tempat,
+  String panitia,
+  String catatan,
+) async {
+  try {
+    // Create a clean JSON object with proper escaping
+    final Map<String, dynamic> data = {
+      'id_admin': adminId,
+      'nama_acara': namaAcara,
+      'tanggal': tanggal,
+      'waktu': waktu,
+      'tempat': tempat, 
+      'panitia': panitia,
+      'catatan': catatan,
+    };
+    
+    final response = await http.post(
+      Uri.parse('$baseUrl/acara.php'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(data),
+    );
 
-      if (response.statusCode == 200) {
-        Map<String, dynamic> result = json.decode(response.body);
-        return result['success'] == true;
-      }
-      return false;
-    } catch (e) {
-      throw Exception("Error addAcara: $e");
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return responseData['success'] ?? false;
     }
+    return false;
+  } catch (e) {
+    print('Error in addAcara: $e');
+    throw Exception('Failed to add acara: $e');
   }
+}
 
-  // UPDATE: Edit acara
-  Future<bool> updateAcara(int idAcara, int idAdmin, String namaAcara,
-      String tanggal, String panitia, String catatan) async {
-    try {
-      final response = await http.put(
-        Uri.parse("$apiUrl?id_acara=$idAcara"), // Pastikan API menangani ini
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          "id_admin": idAdmin,
-          "nama_acara": namaAcara,
-          "tanggal": tanggal,
-          "panitia": panitia,
-          "catatan": catatan
-        }),
-      );
-
-      print("Response Update: \${response.body}"); // Debugging
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> result = json.decode(response.body);
-        return result['success'] == true;
-      }
-      return false;
-    } catch (e) {
-      throw Exception("Error updateAcara: $e");
+ Future<bool> updateAcara(
+  int idAcara,
+  int adminId,
+  String namaAcara,
+  String tanggal,
+  String waktu,
+  String tempat,
+  String panitia,
+  String catatan,
+) async {
+  try {
+    // Create a clean JSON object with proper escaping
+    final Map<String, dynamic> data = {
+      'id_acara': idAcara,
+      'id_admin': adminId,
+      'nama_acara': namaAcara,
+      'tanggal': tanggal,
+      'waktu': waktu,
+      'tempat': tempat,
+      'panitia': panitia,
+      'catatan': catatan,
+    };
+    
+    final response = await http.put(
+      Uri.parse('$baseUrl/acara.php/$idAcara'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(data),
+    );
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return responseData['success'] ?? false;
     }
+    return false;
+  } catch (e) {
+    throw Exception('Failed to update acara: $e');
   }
+}
 
-  // DELETE: Hapus acara
   Future<bool> deleteAcara(int idAcara) async {
     try {
-      final response = await http.delete(Uri.parse("$apiUrl?id_acara=$idAcara"));
-      print("Response Delete: \${response.body}"); // Debugging
-
+      final response = await http.delete(
+        Uri.parse('$baseUrl/acara.php/$idAcara'),
+      );
       if (response.statusCode == 200) {
-        Map<String, dynamic> result = json.decode(response.body);
-        return result['success'] == true;
+        final responseData = json.decode(response.body);
+        return responseData['success'] ?? false;
       }
       return false;
     } catch (e) {
-      throw Exception("Error deleteAcara: $e");
+      throw Exception('Failed to delete acara: $e');
     }
   }
 }

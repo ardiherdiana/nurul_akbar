@@ -1,8 +1,12 @@
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../models/admin_model.dart';
 
-class AuthController {
+class AdminController extends GetxController {
   final String baseUrl = "http://192.168.35.105/api_nurul_akbar";
+  var isLoading = false.obs;
+  var admin = Rx<Admin?>(null);
 
   Future<bool> checkServerConnection() async {
     try {
@@ -15,6 +19,7 @@ class AuthController {
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
+      isLoading(true);
       final response = await http.post(
         Uri.parse('$baseUrl/login.php'),
         body: {
@@ -24,7 +29,11 @@ class AuthController {
       );
       
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        var jsonResponse = json.decode(response.body);
+        if (jsonResponse['status'] == 'success') {
+          admin.value = Admin.fromJson(jsonResponse['data']);
+        }
+        return jsonResponse;
       } else {
         return {
           "status": "error",
@@ -36,11 +45,14 @@ class AuthController {
         "status": "error",
         "message": "Connection error: $e",
       };
+    } finally {
+      isLoading(false);
     }
   }
 
   Future<Map<String, dynamic>> register(String namaAdmin, String password) async {
     try {
+      isLoading(true);
       final response = await http.post(
         Uri.parse('$baseUrl/admin_register.php'),
         body: {
@@ -62,6 +74,12 @@ class AuthController {
         "status": "error",
         "message": "Connection error: $e",
       };
+    } finally {
+      isLoading(false);
     }
+  }
+
+  void logout() {
+    admin.value = null;
   }
 }

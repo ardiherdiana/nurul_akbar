@@ -2,21 +2,28 @@ import 'package:flutter/material.dart';
 import 'pemasukan.dart';
 import 'pengeluaran.dart';
 
-class TambahKeuanganDialog extends StatefulWidget {
+class TambahKeuanganScreen extends StatefulWidget {
   @override
-  _TambahKeuanganDialogState createState() => _TambahKeuanganDialogState();
+  _TambahKeuanganScreenState createState() => _TambahKeuanganScreenState();
 }
 
-class _TambahKeuanganDialogState extends State<TambahKeuanganDialog> {
+class _TambahKeuanganScreenState extends State<TambahKeuanganScreen> {
   bool isPemasukan = true;
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("Tambah Data Keuangan"),
-      content: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Tambah Data Keuangan", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -50,12 +57,13 @@ class _TambahKeuanganDialogState extends State<TambahKeuanganDialog> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            isPemasukan ? PemasukanForm() : PengeluaranForm(),
+            SizedBox(height: 20),
+            Expanded(
+              child: isPemasukan ? PemasukanForm() : PengeluaranForm(),
+            ),
           ],
         ),
       ),
-      
     );
   }
 }

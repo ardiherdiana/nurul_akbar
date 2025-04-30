@@ -3,6 +3,8 @@ class Acara {
   int idAdmin;
   String namaAcara;
   String tanggal;
+  String waktu;     // Added field
+  String tempat;    // Added field
   String panitia;
   String catatan;
 
@@ -11,6 +13,8 @@ class Acara {
     required this.idAdmin,
     required this.namaAcara,
     required this.tanggal,
+    required this.waktu,    // Added parameter
+    required this.tempat,   // Added parameter
     required this.panitia,
     required this.catatan,
   });
@@ -21,6 +25,8 @@ class Acara {
       idAdmin: int.tryParse(json['id_admin']?.toString() ?? '') ?? 0,
       namaAcara: json['nama_acara']?.toString() ?? '',
       tanggal: json['tanggal']?.toString() ?? '',
+      waktu: json['waktu']?.toString() ?? '',      // Added field
+      tempat: json['tempat']?.toString() ?? '',    // Added field
       panitia: json['panitia']?.toString() ?? '',
       catatan: json['catatan']?.toString() ?? '',
     );
@@ -32,6 +38,8 @@ class Acara {
       'id_admin': idAdmin,
       'nama_acara': namaAcara,
       'tanggal': tanggal,
+      'waktu': waktu,       // Added field
+      'tempat': tempat,     // Added field
       'panitia': panitia,
       'catatan': catatan,
     };

@@ -35,10 +35,6 @@ class Navigation extends StatelessWidget {
           icon: Icon(Icons.group),
           label: 'Pengurus',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profil',
-        ),
       ],
     );
   }

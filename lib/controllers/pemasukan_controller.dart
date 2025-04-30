@@ -3,7 +3,23 @@ import 'package:http/http.dart' as http;
 import '../models/pemasukan_model.dart';
 
 class PemasukanController {
-  final String apiUrl = "http://192.168.132.105/api_nurul_akbar/pemasukan.php";
+  final String apiUrl = "http://192.168.35.105/api_nurul_akbar/pemasukan.php";
+
+  Future<int> fetchTotalPemasukan() async {
+    try {
+      final response = await http.get(Uri.parse("$apiUrl?total=true"));
+      print("Response Total Pemasukan: ${response.body}"); // Debugging
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        return data['total'] ?? 0;
+      } else {
+        throw Exception("Gagal mengambil total pemasukan");
+      }
+    } catch (e) {
+      throw Exception("Error fetchTotalPemasukan: $e");
+    }
+  }
 
   // READ: Ambil semua data pemasukan
   Future<List<Pemasukan>> fetchPemasukan() async {
@@ -45,7 +61,7 @@ class PemasukanController {
   // CREATE: Tambah pemasukan baru
   Future<bool> addPemasukan(
       int idAdmin,
-      String nama,
+      String namaDonatur,
       String tanggal,
       int jumlah,
       String jenisPemasukan,
@@ -57,7 +73,7 @@ class PemasukanController {
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           "id_admin": idAdmin,
-          "nama": nama,
+          "nama_donatur": namaDonatur,
           "tanggal": tanggal,
           "jumlah": jumlah,
           "jenis_pemasukan": jenisPemasukan,
@@ -65,7 +81,7 @@ class PemasukanController {
           "catatan": catatan
         }),
       );
-      print("Response Add: \${response.body}"); // Debugging
+      print("Response Add: ${response.body}"); // Debugging
       return response.statusCode == 200;
     } catch (e) {
       throw Exception("Error addPemasukan: $e");
@@ -76,7 +92,7 @@ class PemasukanController {
   Future<bool> updatePemasukan(
       int idPemasukan,
       int idAdmin,
-      String nama,
+      String namaDonatur,
       String tanggal,
       int jumlah,
       String jenisPemasukan,
@@ -84,12 +100,12 @@ class PemasukanController {
       String catatan) async {
     try {
       final response = await http.put(
-        Uri.parse(apiUrl), // API membaca dari body, bukan URL
+        Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           "id_pemasukan": idPemasukan,
           "id_admin": idAdmin,
-          "nama": nama,
+          "nama_donatur": namaDonatur,
           "tanggal": tanggal,
           "jumlah": jumlah,
           "jenis_pemasukan": jenisPemasukan,

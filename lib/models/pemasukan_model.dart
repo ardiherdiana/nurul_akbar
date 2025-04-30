@@ -1,7 +1,7 @@
 class Pemasukan {
   int idPemasukan;
   int idAdmin;
-  String nama;
+  String namaDonatur;
   String tanggal;
   int jumlah;
   String jenisPemasukan;
@@ -11,7 +11,7 @@ class Pemasukan {
   Pemasukan({
     required this.idPemasukan,
     required this.idAdmin,
-    required this.nama,
+    required this.namaDonatur,
     required this.tanggal,
     required this.jumlah,
     required this.jenisPemasukan,
@@ -23,12 +23,12 @@ class Pemasukan {
     return Pemasukan(
       idPemasukan: int.tryParse(json['id_pemasukan'].toString()) ?? 0,
       idAdmin: int.tryParse(json['id_admin'].toString()) ?? 0,
-      nama: json['nama'].toString(),
-      tanggal: json['tanggal'].toString(),
-      jumlah: int.tryParse(json['jumlah'].toString()) ?? 0,
-      jenisPemasukan: json['jenis_pemasukan'].toString(),
-      metodePembayaran: json['metode_pembayaran'].toString(),
-      catatan: json['catatan'].toString(),
+      namaDonatur: json['nama_donatur']?.toString() ?? '',
+      tanggal: json['tanggal']?.toString() ?? '',
+      jumlah: (double.tryParse(json['jumlah'].toString()) ?? 0).toInt(),
+      jenisPemasukan: json['jenis_pemasukan']?.toString() ?? '',
+      metodePembayaran: json['metode_pembayaran']?.toString() ?? '',
+      catatan: json['catatan']?.toString() ?? '',
     );
   }
 
@@ -36,7 +36,7 @@ class Pemasukan {
     return {
       'id_pemasukan': idPemasukan,
       'id_admin': idAdmin,
-      'nama': nama,
+      'nama_donatur': namaDonatur,  // Changed from namaDonatur
       'tanggal': tanggal,
       'jumlah': jumlah,
       'jenis_pemasukan': jenisPemasukan,
