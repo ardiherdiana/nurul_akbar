@@ -146,10 +146,6 @@ class _BerandaState extends State<BerandaScreen> {
       children: [
         Row(
           children: [
-            const CircleAvatar(
-              radius: 30,
-              backgroundImage: AssetImage('assets/images/ardi-pm.png'),
-            ),
             const SizedBox(width: 15),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,11 +169,11 @@ class _BerandaState extends State<BerandaScreen> {
                 content: Text('Apakah Anda yakin ingin keluar?'),
                 actions: [
                   TextButton(
-                    child: Text('Batal'),
+                    child: Text('Batal', style: TextStyle(color: Colors.grey)),
                     onPressed: () => Navigator.pop(context, false),
                   ),
                   TextButton(
-                    child: Text('Logout', style: TextStyle(color: Colors.red)),
+                    child: Text('Logout', style: TextStyle(color: Colors.green)),
                     onPressed: () => Navigator.pop(context, true),
                   ),
                 ],

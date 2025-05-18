@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/pemasukan_model.dart';
 
 class PemasukanController {
-  final String apiUrl = "http://192.168.35.105/api_nurul_akbar/pemasukan.php";
+  final String apiUrl = "http://192.168.27.105/api_nurul_akbar/pemasukan.php";
 
   Future<int> fetchTotalPemasukan() async {
     try {

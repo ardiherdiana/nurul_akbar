@@ -63,6 +63,18 @@ class _PemasukanFormState extends State<PemasukanForm> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.green,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -128,13 +140,13 @@ class _PemasukanFormState extends State<PemasukanForm> {
     return InputDecoration(
       labelText: label,
       prefixIcon: icon != null ? Icon(icon, color: Colors.green) : null,
-      labelStyle: TextStyle(color: Colors.green),
+      labelStyle: TextStyle(color: Colors.grey),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: Colors.green, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.green.shade200),
+        borderSide: BorderSide(color: Colors.grey),
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -147,17 +159,19 @@ class _PemasukanFormState extends State<PemasukanForm> {
         title: Text('Edit Pemasukan'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ) : null,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),  // Changed from 4.0 to 16.0
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: namaDonaturController,  // Changed from namaController
-                decoration: _inputDecoration("Nama Donatur", icon: Icons.person),  // Updated label
+              TextFormField(  // Removed extra SizedBox at the top
+                controller: namaDonaturController,
+                cursorColor: Colors.green,
+                decoration: _inputDecoration("Nama Donatur", icon: Icons.person),
                 validator: (value) => (value == null || value.isEmpty)
                     ? "Nama donatur wajib diisi"  // Updated validation message
                     : null,
@@ -165,9 +179,9 @@ class _PemasukanFormState extends State<PemasukanForm> {
               SizedBox(height: 12),
               TextFormField(
                 controller: tanggalController,
+                cursorColor: Colors.green,
                 readOnly: true,
-                decoration:
-                    _inputDecoration("Tanggal", icon: Icons.calendar_today),
+                decoration: _inputDecoration("Tanggal", icon: Icons.calendar_today),
                 onTap: _selectDate,
                 validator: (value) => (value == null || value.isEmpty)
                     ? "Tanggal wajib diisi"
@@ -176,9 +190,9 @@ class _PemasukanFormState extends State<PemasukanForm> {
               SizedBox(height: 12),
               TextFormField(
                 controller: jumlahController,
+                cursorColor: Colors.green,
                 keyboardType: TextInputType.number,
-                decoration:
-                    _inputDecoration("Jumlah (Rp)", icon: Icons.attach_money),
+                decoration: _inputDecoration("Jumlah (Rp)", icon: Icons.attach_money),
                 validator: (value) => (value == null ||
                         value.isEmpty ||
                         int.tryParse(value) == null)
@@ -214,6 +228,7 @@ class _PemasukanFormState extends State<PemasukanForm> {
               SizedBox(height: 12),
               TextFormField(
                 controller: catatanController,
+                cursorColor: Colors.green,
                 maxLines: 4,
                 minLines: 3,
                 decoration: _inputDecoration("Catatan (Opsional)")

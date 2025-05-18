@@ -88,14 +88,17 @@ class _KeuanganState extends State<KeuanganScreen> {
       builder: (context) => AlertDialog(
         title: Text("Konfirmasi"),
         content: Text("Yakin ingin menghapus data ini?"),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text("Batal"),
+            child: Text("Batal", style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text("Hapus", style: TextStyle(color: Colors.red)),
+            child: Text("Hapus", style: TextStyle(color: Colors.green)),
           ),
         ],
       ),
@@ -241,7 +244,7 @@ class _KeuanganState extends State<KeuanganScreen> {
                             key: UniqueKey(),
                             direction: DismissDirection.endToStart,
                             background: Container(
-                              margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                              margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.red,
                                 borderRadius: BorderRadius.circular(8),
@@ -262,7 +265,7 @@ class _KeuanganState extends State<KeuanganScreen> {
                               return false;
                             },
                             child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                              margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
@@ -306,11 +309,11 @@ class _KeuanganState extends State<KeuanganScreen> {
                                       'tanggal': DateFormat('yyyy-MM-dd').format(transaksi["tanggal"]),
                                       'jumlah': transaksi["jumlah"].toString(),
                                       'jenisPemasukan': transaksi["jenis_pemasukan"],
-                                      'metodePembayaran': transaksi["metodePembayaran"],
+                                      'metodePembayaran': transaksi["metodePembayaran"] ?? "QRIS", // Set default if null
                                       'catatan': transaksi["catatan"] ?? '',
                                     };
                                     
-                                    bool? result = await Navigator.push(
+                                    final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => PemasukanForm(
@@ -319,10 +322,14 @@ class _KeuanganState extends State<KeuanganScreen> {
                                         ),
                                       ),
                                     );
+                                    
                                     if (result == true) {
                                       fetchDataKeuangan();
+                                      if (widget.onDataChanged != null) {
+                                        widget.onDataChanged!();
+                                      }
                                     }
-                                  } else if (!isPemasukan) {
+                                  } else {
                                     Map<String, dynamic> editData = {
                                       'id': transaksi["id"],
                                       'tujuan': transaksi["nama"],

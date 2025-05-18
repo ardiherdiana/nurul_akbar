@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class PengurusController {
   final String apiUrl = kIsWeb
-      ? "http://192.168.35.105/api_nurul_akbar/pengurus.php"
-      : "http://192.168.35.105/api_nurul_akbar/pengurus.php";
+      ? "http://192.168.27.105/api_nurul_akbar/pengurus.php"
+      : "http://192.168.27.105/api_nurul_akbar/pengurus.php";
 
   Future<List<Pengurus>> fetchPengurus() async {
     try {

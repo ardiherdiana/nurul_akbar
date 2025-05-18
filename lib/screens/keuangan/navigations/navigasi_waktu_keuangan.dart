@@ -25,6 +25,32 @@ class _NavigasiWaktuKeuanganState extends State<NavigasiWaktuKeuangan> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       initialDateRange: widget.selectedRange,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.green,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: Colors.white,
+              headerBackgroundColor: Colors.green.withOpacity(0.1),
+              rangeSelectionBackgroundColor: Colors.green.withOpacity(0.1),
+              dayBackgroundColor: MaterialStateProperty.resolveWith(
+                (states) => states.contains(MaterialState.selected) 
+                    ? Colors.green 
+                    : null,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {

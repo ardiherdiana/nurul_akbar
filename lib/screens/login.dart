@@ -103,10 +103,13 @@ class _LoginState extends State<Login> {
             onPressed: () {
               Navigator.of(context).pop();
               if (isSuccess) {
-                _saveLoginStatus(); // Simpan status login
+                _saveLoginStatus();
               }
             },
-            child: Text('OK'),
+            child: Text(
+              'OK',
+              style: TextStyle(color: Colors.green),
+            ),
           ),
         ],
       ),
@@ -145,6 +148,7 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 32),
                 TextField(
                   controller: _usernameController,
+                  cursorColor: Colors.green,
                   decoration: InputDecoration(
                     hintText: 'Username',
                     hintStyle: TextStyle(color: Colors.grey),
@@ -159,6 +163,7 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 24),
                 TextField(
                   controller: _passwordController,
+                  cursorColor: Colors.green,
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: 'Password',

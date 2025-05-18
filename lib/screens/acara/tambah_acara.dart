@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nurul_akbar/controllers/acara_controller.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class TambahAcara extends StatefulWidget {
   final bool isEditing;
@@ -18,18 +22,20 @@ class TambahAcara extends StatefulWidget {
 class _AcaraFormState extends State<TambahAcara> {
   final AcaraController _controller = AcaraController();
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;  // Add this line
+  bool _isLoading = false;
   int? adminId;
   String? username;
 
-  // Add new controllers
   TextEditingController namaAcaraController = TextEditingController();
   TextEditingController tanggalController = TextEditingController();
-  TextEditingController waktuController = TextEditingController();    // New
-  TextEditingController tempatController = TextEditingController();   // New
+  TextEditingController waktuController = TextEditingController();
+  TextEditingController tempatController = TextEditingController();
   TextEditingController panitiaController = TextEditingController();
   TextEditingController catatanController = TextEditingController();
-
+  final ImagePicker _picker = ImagePicker();
+  File? _imageFile;
+  String? _base64Image;
+  
   @override
   void initState() {
     super.initState();
@@ -38,101 +44,38 @@ class _AcaraFormState extends State<TambahAcara> {
     if (widget.isEditing && widget.editData != null) {
       namaAcaraController.text = widget.editData!['nama_acara'] ?? '';
       tanggalController.text = widget.editData!['tanggal'] ?? '';
-      waktuController.text = widget.editData!['waktu'] ?? '';      // New
-      tempatController.text = widget.editData!['tempat'] ?? '';    // New
+      waktuController.text = widget.editData!['waktu'] ?? '';
+      tempatController.text = widget.editData!['tempat'] ?? '';
       panitiaController.text = widget.editData!['panitia'] ?? '';
       catatanController.text = widget.editData!['catatan'] ?? '';
+      
+      // Memastikan foto sebelumnya dimuat saat mode edit
+      if (widget.editData!['foto_acara'] != null && widget.editData!['foto_acara'].toString().isNotEmpty) {
+        setState(() {
+          _base64Image = widget.editData!['foto_acara'];
+          print("Foto acara dimuat: ${_base64Image!.substring(0, 20)}..."); // Debug print
+        });
+      }
     }
   }
 
-  // Add time picker method
-  Future<void> _selectTime() async {
-    TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
     );
-    if (picked != null) {
+
+    if (pickedFile != null) {
       setState(() {
-        waktuController.text = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+        _imageFile = File(pickedFile.path);
       });
+      
+      // Convert to base64
+      final bytes = await _imageFile!.readAsBytes();
+      _base64Image = base64Encode(bytes);
     }
-  }
-
-  void _submitData() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      bool success;
-      if (widget.isEditing) {
-        success = await _controller.updateAcara(
-          widget.editData!['id_acara'],
-          adminId ?? 0,
-          namaAcaraController.text,
-          tanggalController.text,
-          waktuController.text,        // New
-          tempatController.text,       // New
-          panitiaController.text,
-          catatanController.text,
-        );
-      } else {
-        success = await _controller.addAcara(
-          adminId ?? 0,
-          namaAcaraController.text,
-          tanggalController.text,
-          waktuController.text,        // New
-          tempatController.text,       // New
-          panitiaController.text,
-          catatanController.text,
-        );
-      }
-
-      if (!mounted) return;
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Data berhasil disimpan'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context, true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal menyimpan data'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      print('Error saving data: $e'); // Debug print
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Terjadi kesalahan: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-
-    setState(() => _isLoading = false);
-  }
-
-  InputDecoration _inputDecoration(String label, {IconData? icon}) {
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: icon != null ? Icon(icon, color: Colors.green) : null,
-      labelStyle: TextStyle(color: Colors.green),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.green, width: 2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.green.shade200),
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
   }
 
   @override
@@ -150,6 +93,105 @@ class _AcaraFormState extends State<TambahAcara> {
           key: _formKey,
           child: ListView(
             children: [
+              // Widget foto dalam bentuk lingkaran dengan tombol edit
+              Center(
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 200,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.green.shade300,
+                          width: 2,
+                        ),
+                      ),
+                      child: ClipOval(
+                        child: _imageFile != null
+                            ? kIsWeb
+                                ? Image.network(
+                                    _imageFile!.path,
+                                    fit: BoxFit.cover,
+                                    width: 200,
+                                    height: 200,
+                                  )
+                                : Image.file(
+                                    _imageFile!,
+                                    fit: BoxFit.cover,
+                                    width: 200,
+                                    height: 200,
+                                  )
+                            : _base64Image != null
+                                ? Image.memory(
+                                    base64Decode(_base64Image!),
+                                    fit: BoxFit.cover,
+                                    width: 200,
+                                    height: 200,
+                                  )
+                                : Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add_photo_alternate,
+                                          size: 50, color: Colors.green),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Tambah Foto',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                      ),
+                    ),
+                    // Tombol pensil untuk mengupload foto baru
+                    Positioned(
+                      right: 0,
+                      bottom: 10,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.edit, color: Colors.white),
+                          onPressed: _pickImage,
+                          iconSize: 20,
+                          padding: EdgeInsets.all(8),
+                          constraints: BoxConstraints(),
+                        ),
+                      ),
+                    ),
+                    // Label Edit Foto Acara khusus untuk mode edit
+                    if (widget.isEditing)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: -30,
+                        child: Text(
+                          'Edit Foto Acara',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: namaAcaraController,
                 decoration: _inputDecoration("Nama Acara", icon: Icons.event),
@@ -238,11 +280,93 @@ class _AcaraFormState extends State<TambahAcara> {
     );
   }
 
+  void _submitData() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      bool success;
+      if (widget.isEditing) {
+        success = await _controller.updateAcara(
+          widget.editData!['id_acara'],
+          adminId ?? 0,
+          namaAcaraController.text,
+          tanggalController.text,
+          waktuController.text,
+          tempatController.text,
+          panitiaController.text,
+          catatanController.text,
+          _base64Image,
+        );
+      } else {
+        success = await _controller.addAcara(
+          adminId ?? 0,
+          namaAcaraController.text,
+          tanggalController.text,
+          waktuController.text,
+          tempatController.text,
+          panitiaController.text,
+          catatanController.text,
+          _base64Image,
+        );
+      }
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data berhasil disimpan'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal menyimpan data'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error saving data: $e'); // Debug print
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() => _isLoading = false);
+  }
+
+  InputDecoration _inputDecoration(String label, {IconData? icon}) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: icon != null ? Icon(icon, color: Colors.green) : null,
+      labelStyle: TextStyle(color: Colors.green),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.green, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.green.shade200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
   @override
   void dispose() {
-    waktuController.dispose();    // New
-    tempatController.dispose();   // New
-    // ... dispose other controllers
+    namaAcaraController.dispose();
+    tanggalController.dispose();
+    waktuController.dispose();
+    tempatController.dispose();
+    panitiaController.dispose();
+    catatanController.dispose();
     super.dispose();
   }
 
@@ -268,6 +392,18 @@ class _AcaraFormState extends State<TambahAcara> {
       setState(() {
         tanggalController.text =
             "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
+  }
+  
+  Future<void> _selectTime() async {
+    TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        waktuController.text = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
       });
     }
   }

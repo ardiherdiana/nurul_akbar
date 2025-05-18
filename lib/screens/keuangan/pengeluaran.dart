@@ -24,10 +24,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   TextEditingController jumlahController = TextEditingController();
   TextEditingController catatanController = TextEditingController();
 
+  String? metodePembayaran;
   bool _isLoading = false;
   int? adminId;
-  String _selectedMetodePembayaran = 'Cash'; // Add this line
-  final List<String> _metodePembayaran = ['Cash', 'Transfer Bank']; // Add this line
 
   @override
   void initState() {
@@ -39,7 +38,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       tanggalController.text = widget.editData!['tanggal'] ?? '';
       jumlahController.text = widget.editData!['jumlah'] ?? '';
       catatanController.text = widget.editData!['catatan'] ?? '';
-      _selectedMetodePembayaran = widget.editData!['metodePembayaran'] ?? 'Cash'; // Add this line
+      metodePembayaran = widget.editData!['metodePembayaran'] ?? '';
     }
   }
 
@@ -59,6 +58,18 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.red,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -66,6 +77,22 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
+  }
+
+  InputDecoration _inputDecoration(String label, {IconData? icon}) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: icon != null ? Icon(icon, color: Colors.red) : null,
+      labelStyle: TextStyle(color: Colors.grey),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
   }
 
   void _submitData() async {
@@ -82,8 +109,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           tanggalController.text,
           int.parse(jumlahController.text),
           tujuanController.text,
+          metodePembayaran!,
           catatanController.text,
-          _selectedMetodePembayaran, // Add this parameter
         );
       } else {
         success = await _controller.addPengeluaran(
@@ -91,10 +118,12 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           tanggalController.text,
           int.parse(jumlahController.text),
           tujuanController.text,
+          metodePembayaran!,
           catatanController.text,
-          _selectedMetodePembayaran,
         );
       }
+
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -105,33 +134,24 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             : "Gagal ${widget.isEditing ? 'memperbarui' : 'menambahkan'} pengeluaran"
           ),
           backgroundColor: success ? Colors.green : Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
 
       if (success) Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Terjadi kesalahan: $e")),
+        SnackBar(
+          content: Text("Terjadi kesalahan: $e"),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
-
-    setState(() => _isLoading = false);
-  }
-
-  InputDecoration _inputDecoration(String label, {IconData? icon}) {
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: icon != null ? Icon(icon, color: Colors.red) : null,
-      labelStyle: TextStyle(color: Colors.red),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red.shade200),
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
   }
 
   @override
@@ -141,23 +161,25 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         title: Text('Edit Pengeluaran'),
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ) : null,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(4.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
+              SizedBox(height: 12),
               TextFormField(
                 controller: tujuanController,
+                cursorColor: Colors.red,
                 decoration: _inputDecoration("Tujuan Pengeluaran", icon: Icons.shopping_cart),
                 validator: (value) => (value == null || value.isEmpty)
                     ? "Tujuan pengeluaran wajib diisi"
                     : null,
               ),
               SizedBox(height: 12),
-              // Add payment method dropdown after tanggal field
               TextFormField(
                 controller: tanggalController,
                 readOnly: true,
@@ -169,21 +191,16 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               ),
               SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _selectedMetodePembayaran,
-                decoration: _inputDecoration("Metode Pembayaran", icon: Icons.payment),
-                items: _metodePembayaran.map((String method) {
-                  return DropdownMenuItem(
-                    value: method,
-                    child: Text(method),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedMetodePembayaran = newValue;
-                    });
-                  }
-                },
+                decoration:
+                    _inputDecoration("Metode Pembayaran", icon: Icons.payment),
+                value: metodePembayaran,
+                items: ["Cash", "Transfer Bank"]
+                    .map((item) =>
+                        DropdownMenuItem(value: item, child: Text(item)))
+                    .toList(),
+                onChanged: (value) => setState(() => metodePembayaran = value),
+                validator: (value) =>
+                    value == null ? "Metode pembayaran wajib dipilih" : null,
               ),
               SizedBox(height: 12),
               TextFormField(

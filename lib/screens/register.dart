@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 );
               }
             },
-            child: Text('OK'),
+            child: Text('OK', style: TextStyle(color: Colors.green)),
           ),
         ],
       ),

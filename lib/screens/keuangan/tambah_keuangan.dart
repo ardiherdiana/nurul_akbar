@@ -14,12 +14,10 @@ class _TambahKeuanganScreenState extends State<TambahKeuanganScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tambah Data Keuangan", style: TextStyle(color: Colors.white)),
+        title: Text("Tambah Data Keuangan", style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.green,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        iconTheme: IconThemeData(color: Colors.white),
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -57,7 +55,6 @@ class _TambahKeuanganScreenState extends State<TambahKeuanganScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
             Expanded(
               child: isPemasukan ? PemasukanForm() : PengeluaranForm(),
             ),

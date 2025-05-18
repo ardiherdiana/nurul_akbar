@@ -129,7 +129,7 @@ class _AcaraScreenState extends State<AcaraScreen>
       key: Key(acara['id_acara'].toString()),
       direction: DismissDirection.endToStart,
       background: Container(
-        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.red,
           borderRadius: BorderRadius.circular(8),
@@ -149,50 +149,53 @@ class _AcaraScreenState extends State<AcaraScreen>
         ),
       ),
       confirmDismiss: (direction) async {
-      final confirm = await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Konfirmasi'),
-          content: Text('Yakin ingin menghapus acara ini?'),
-          actions: [
-            TextButton(
-              child: Text('Batal'),
-              onPressed: () => Navigator.pop(context, false),
+        final confirm = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Konfirmasi'),
+            content: Text('Yakin ingin menghapus acara ini?'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-            TextButton(
-              child: Text('Hapus', style: TextStyle(color: Colors.red)),
-              onPressed: () => Navigator.pop(context, true),
-            ),
-          ],
-        ),
-      );
+            actions: [
+              TextButton(
+                child: Text('Batal', style: TextStyle(color: Colors.grey)),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              TextButton(
+                child: Text('Hapus', style: TextStyle(color: Colors.red)),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+        );
 
-      if (confirm == true) {
-        try {
-          bool success = await _controller.deleteAcara(acara['id_acara']);
-          if (success) {
-            _loadAcara();
+        if (confirm == true) {
+          try {
+            bool success = await _controller.deleteAcara(acara['id_acara']);
+            if (success) {
+              _loadAcara();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Acara berhasil dihapus')),
+              );
+              return true;
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Gagal menghapus acara')),
+              );
+              return false;
+            }
+          } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Acara berhasil dihapus')),
-            );
-            return true;
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Gagal menghapus acara')),
+              SnackBar(content: Text('Gagal menghapus acara: $e')),
             );
             return false;
           }
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal menghapus acara: $e')),
-          );
-          return false;
         }
-      }
-      return false;
-    },
+        return false;
+      },
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),

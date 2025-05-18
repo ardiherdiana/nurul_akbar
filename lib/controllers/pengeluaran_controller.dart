@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/pengeluaran_model.dart';
 
 class PengeluaranController {
-  final String apiUrl = "http://192.168.35.105/api_nurul_akbar/pengeluaran.php";
+  final String apiUrl = "http://192.168.27.105/api_nurul_akbar/pengeluaran.php";
 
   Future<int> fetchTotalPengeluaran() async {
     try {
@@ -40,7 +40,8 @@ class PengeluaranController {
   }
 
   // READ: Ambil data pengeluaran dengan paginasi
-  Future<List<Pengeluaran>> fetchPengeluaranPaginated(int limit, int offset) async {
+  Future<List<Pengeluaran>> fetchPengeluaranPaginated(
+      int limit, int offset) async {
     try {
       final response =
           await http.get(Uri.parse("$apiUrl?limit=$limit&offset=$offset"));
@@ -59,14 +60,8 @@ class PengeluaranController {
   }
 
   // CREATE: Tambah pengeluaran baru
-  // Update CREATE method
-  Future<bool> addPengeluaran(
-      int idAdmin,
-      String tanggal,
-      int jumlah,
-      String tujuan,
-      String catatan,
-      String metodePembayaran) async {  // Add this parameter
+  Future<bool> addPengeluaran(int idAdmin, String tanggal, int jumlah,
+      String tujuan, String metodePembayaran, String catatan) async {
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -76,8 +71,8 @@ class PengeluaranController {
           "tanggal": tanggal,
           "jumlah": jumlah,
           "tujuan": tujuan,
-          "catatan": catatan,
-          "metode_pembayaran": metodePembayaran  // Add this field
+          "metode_pembayaran": metodePembayaran,
+          "catatan": catatan
         }),
       );
       return response.statusCode == 200;
@@ -87,15 +82,14 @@ class PengeluaranController {
   }
 
   // UPDATE: Edit pengeluaran
-  // Update UPDATE method
   Future<bool> updatePengeluaran(
       int idPengeluaran,
       int idAdmin,
       String tanggal,
       int jumlah,
       String tujuan,
-      String catatan,
-      String metodePembayaran) async {  // Add this parameter
+      String metodePembayaran,
+      String catatan) async {
     try {
       final response = await http.put(
         Uri.parse(apiUrl),
@@ -106,8 +100,8 @@ class PengeluaranController {
           "tanggal": tanggal,
           "jumlah": jumlah,
           "tujuan": tujuan,
-          "catatan": catatan,
-          "metode_pembayaran": metodePembayaran  // Add this field
+          "metode_pembayaran": metodePembayaran,
+          "catatan": catatan
         }),
       );
       return response.statusCode == 200;
